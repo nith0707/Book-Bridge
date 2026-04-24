@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book Bridge - Cart</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="inner-page">
+  <nav class="navbar">
+    <div class="nav-logo">📚 Book Bridge</div>
+    <div class="nav-links" id="navLinks"></div>
+  </nav>
+
+  <main class="cart-main">
+    <h2>🛒 Your Cart</h2>
+
+    <div id="cartEmpty" class="cart-empty hidden">
+      <div class="empty-icon">🛒</div>
+      <p>Your cart is empty.</p>
+      <a href="browse.html" class="btn-primary">Browse Books</a>
+    </div>
+
+    <div id="cartContent">
+      <div id="cartItems" class="cart-items"></div>
+      <div class="cart-summary">
+        <div class="summary-row">
+          <span>Total Items:</span>
+          <strong id="totalItems">0</strong>
+        </div>
+        <div class="summary-row total-row">
+          <span>Grand Total:</span>
+          <strong id="grandTotal">₹0</strong>
+        </div>
+        <button id="checkoutBtn" class="btn-primary full-width" onclick="checkout()">Proceed to Checkout</button>
+        <button class="btn-secondary full-width" onclick="clearCart()">Clear Cart</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/cart.js"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book Bridge - Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="inner-page">
+  <nav class="navbar">
+    <div class="nav-logo">📚 Book Bridge</div>
+    <div class="nav-links" id="navLinks"></div>
+  </nav>
+
+  <main class="dashboard-main">
+    <div class="welcome-banner">
+      <div class="welcome-left">
+        <h2>Welcome back, <span id="welcomeUser"></span>! 👋</h2>
+        <p id="welcomeSub"></p>
+      </div>
+      <div class="role-badge" id="roleBadge"></div>
+    </div>
+
+    <div class="dashboard-cards" id="dashCards"></div>
+
+    <div class="stats-row" id="statsRow"></div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

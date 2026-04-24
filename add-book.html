@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book Bridge - Add Book</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="inner-page">
+  <nav class="navbar">
+    <div class="nav-logo">📚 Book Bridge</div>
+    <div class="nav-links" id="navLinks"></div>
+  </nav>
+
+  <main class="addbook-main">
+
+    <!-- Left: Form -->
+    <div class="addbook-form-col">
+      <div class="form-card">
+        <div class="addbook-header">
+          <span class="addbook-icon">✍️</span>
+          <div>
+            <h2>List a New Book</h2>
+            <p class="form-subtitle">Fill in the details — your book goes live instantly</p>
+          </div>
+        </div>
+
+        <form id="addBookForm" onsubmit="handleAddBook(event)" autocomplete="off">
+
+          <!-- Title -->
+          <div class="form-group">
+            <label>Book Title <span class="req">*</span></label>
+            <input type="text" id="bookTitle" placeholder="e.g. The Alchemist"
+                   oninput="updatePreview()" required />
+            <span class="field-error" id="err-bookTitle"></span>
+          </div>
+
+          <!-- Author -->
+          <div class="form-group">
+            <label>Author <span class="req">*</span></label>
+            <input type="text" id="bookAuthor" placeholder="e.g. Paulo Coelho"
+                   oninput="updatePreview()" required />
+            <span class="field-error" id="err-bookAuthor"></span>
+          </div>
+
+          <!-- Category -->
+          <div class="form-group">
+            <label>Category <span class="req">*</span></label>
+            <div class="category-chips" id="categoryChips">
+              <button type="button" class="chip" data-val="Thriller"      onclick="selectCategory(this)">🔪 Thriller</button>
+              <button type="button" class="chip" data-val="Philosophical" onclick="selectCategory(this)">🧠 Philosophical</button>
+              <button type="button" class="chip" data-val="RomCom"        onclick="selectCategory(this)">💕 RomCom</button>
+              <button type="button" class="chip" data-val="FanFiction"    onclick="selectCategory(this)">🧙 FanFiction</button>
+              <button type="button" class="chip" data-val="Education"     onclick="selectCategory(this)">📘 Education</button>
+              <button type="button" class="chip" data-val="BTech CSE"     onclick="selectCategory(this)">💻 BTech CSE</button>
+            </div>
+            <input type="hidden" id="bookCategory" />
+            <span class="field-error" id="err-bookCategory"></span>
+          </div>
+
+          <!-- Prices -->
+          <div class="form-row">
+            <div class="form-group">
+              <label>Rent Price / day (₹) <span class="req">*</span></label>
+              <div class="price-input-wrap">
+                <span class="price-symbol">₹</span>
+                <input type="number" id="rentPrice" min="1" placeholder="20"
+                       oninput="updatePreview()" required />
+              </div>
+              <span class="field-error" id="err-rentPrice"></span>
+            </div>
+            <div class="form-group">
+              <label>Buy Price (₹) <span class="req">*</span></label>
+              <div class="price-input-wrap">
+                <span class="price-symbol">₹</span>
+                <input type="number" id="buyPrice" min="1" placeholder="299"
+                       oninput="updatePreview()" required />
+              </div>
+              <span class="field-error" id="err-buyPrice"></span>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="form-group">
+            <label>Description <span style="color:var(--text-muted);font-size:11px">(optional)</span></label>
+            <textarea id="bookDesc" rows="3" placeholder="A short description of the book…"
+                      oninput="updatePreview()"></textarea>
+          </div>
+
+          <!-- Cover image -->
+          <div class="form-group">
+            <label>Cover Image</label>
+            <div class="cover-upload-area" id="coverUploadArea" onclick="document.getElementById('coverFile').click()">
+              <div class="cover-upload-placeholder" id="coverPlaceholder">
+                <span>📷</span>
+                <p>Click to upload cover</p>
+                <small>JPG, PNG, WEBP · max 5MB</small>
+              </div>
+              <img id="coverPreviewImg" class="cover-preview-img hidden" alt="Cover preview" />
+            </div>
+            <input type="file" id="coverFile" accept="image/jpeg,image/png,image/webp"
+                   style="display:none" onchange="handleCoverFile(this)" />
+            <p class="cover-or">— or paste an image URL —</p>
+            <input type="url" id="bookImage" placeholder="https://covers.example.com/book.jpg"
+                   oninput="handleImageUrl(this.value)" />
+          </div>
+
+          <div id="addBookError"   class="error-msg"  style="margin-top:8px"></div>
+          <div id="addBookSuccess" class="success-msg hidden"></div>
+
+          <button type="submit" class="btn-primary full-width" id="submitBtn">
+            🚀 Publish Book
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right: Live Preview -->
+    <div class="addbook-preview-col">
+      <div class="preview-sticky">
+        <p class="preview-label">Live Preview</p>
+        <div class="book-card preview-card">
+          <div class="book-img-wrap">
+            <img id="previewCover" class="book-cover"
+                 src="https://via.placeholder.com/300x420/1e1b3a/6c63ff?text=Cover"
+                 alt="Preview" />
+          </div>
+          <div class="book-info">
+            <div class="book-title"  id="previewTitle">Book Title</div>
+            <div class="book-author" id="previewAuthor">by Author Name</div>
+            <span class="book-category" id="previewCategory" data-cat="">Category</span>
+            <div class="book-prices">
+              <div class="price-tag">Rent: <strong id="previewRent">₹—/day</strong></div>
+              <div class="price-tag">Buy: <strong id="previewBuy">₹—</strong></div>
+            </div>
+            <p class="preview-desc" id="previewDesc"></p>
+          </div>
+          <div class="book-actions">
+            <button class="btn-rent" disabled>📅 Rent</button>
+            <button class="btn-buy"  disabled>🛒 Buy</button>
+            <button class="btn-cart" disabled>+ Cart</button>
+          </div>
+        </div>
+
+        <!-- Writer's listings -->
+        <div class="my-listings" id="myListings">
+          <p class="preview-label" style="margin-top:24px">Your Listings</p>
+          <div id="myListingsGrid" class="my-listings-grid">
+            <p class="loading-text">Loading…</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/add-book.js"></script>
+</body>
+</html>

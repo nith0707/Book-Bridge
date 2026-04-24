@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book Bridge - Browse Books</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="inner-page">
+  <nav class="navbar">
+    <div class="nav-logo">📚 Book Bridge</div>
+    <div class="nav-links" id="navLinks"></div>
+  </nav>
+
+  <main class="browse-main">
+    <div class="browse-header">
+      <h2>Browse Books</h2>
+      <div class="search-filter-bar">
+        <input type="text" id="searchInput" placeholder="🔍 Search by title..." oninput="filterBooks()" />
+        <select id="authorFilter" onchange="filterBooks()">
+          <option value="">All Authors</option>
+        </select>
+        <select id="categoryFilter" onchange="filterBooks()">
+          <option value="">All Categories</option>
+          <option value="Philosophical">Philosophical</option>
+          <option value="Thriller">Thriller</option>
+          <option value="RomCom">RomCom</option>
+          <option value="FanFiction">FanFiction</option>
+          <option value="Education">Education</option>
+          <option value="BTech CSE">BTech CSE</option>
+        </select>
+      </div>
+      <div class="results-count" id="resultsCount"></div>
+    </div>
+
+    <div id="booksGrid" class="books-grid"></div>
+    <div id="noResults" class="no-results hidden">No books found matching your search.</div>
+  </main>
+
+  <!-- Rent Modal -->
+  <div id="rentModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>📅 Rent Book</h3>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <p id="rentBookTitle" class="modal-book-title"></p>
+
+      <div class="rent-rate-info" id="rentRateInfo"></div>
+
+      <div class="form-group">
+        <label>Number of Days</label>
+        <div class="days-picker">
+          <button type="button" class="days-btn" onclick="changeDays(-1)">−</button>
+          <input type="number" id="rentDays" min="1" max="365" value="1" oninput="calcRent()" />
+          <button type="button" class="days-btn" onclick="changeDays(1)">+</button>
+        </div>
+        <span class="field-error" id="err-rentDays"></span>
+      </div>
+
+      <!-- Quick-pick presets -->
+      <div class="day-presets">
+        <button type="button" class="preset-btn" onclick="setDays(1)">1 Day</button>
+        <button type="button" class="preset-btn" onclick="setDays(3)">3 Days</button>
+        <button type="button" class="preset-btn" onclick="setDays(7)">1 Week</button>
+        <button type="button" class="preset-btn" onclick="setDays(14)">2 Weeks</button>
+        <button type="button" class="preset-btn" onclick="setDays(30)">1 Month</button>
+      </div>
+
+      <!-- Fee breakdown -->
+      <div class="fee-breakdown" id="feeBreakdown">
+        <div class="fee-row"><span>Rate</span><span id="feeRate">—</span></div>
+        <div class="fee-row"><span>Days</span><span id="feeDays">—</span></div>
+        <div class="fee-row fee-total-row"><span>Total</span><span id="feeTotal">—</span></div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-primary" onclick="confirmRent()">Confirm Rent</button>
+        <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Buy Modal -->
+  <div id="buyModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>🛒 Buy Book</h3>
+        <button class="modal-close" onclick="closeBuyModal()">✕</button>
+      </div>
+      <p id="buyBookTitle" class="modal-book-title"></p>
+      <div class="fee-breakdown">
+        <div class="fee-row"><span>Book Price</span><span id="buyPrice">—</span></div>
+        <div class="fee-row fee-total-row"><span>You Pay</span><span id="buyTotal">—</span></div>
+      </div>
+      <p class="buy-note">This is a one-time purchase. The book will be added to your cart.</p>
+      <div class="modal-actions">
+        <button class="btn-primary" onclick="confirmBuy()">Confirm Purchase</button>
+        <button class="btn-secondary" onclick="closeBuyModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/browse.js"></script>
+</body>
+</html>
