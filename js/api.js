@@ -2,7 +2,7 @@
 // Switch between local dev and production automatically
 const API = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
   ? 'http://localhost:5000/api'
-  : 'https://bookbridge-api.onrender.com/api'; // ← replace with your Render URL
+  : 'https://book-bridge-vgkn.onrender.com/api';
 
 // Token helpers
 function getToken()       { return localStorage.getItem('bb_token'); }
