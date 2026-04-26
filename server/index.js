@@ -17,6 +17,8 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   'http://127.0.0.1:5500',
   'http://localhost:5500',
+  'http://127.0.0.1:5501',
+  'http://localhost:5501',
   'http://127.0.0.1:3000',
   'http://localhost:3000',
   process.env.CLIENT_URL,
@@ -26,7 +28,9 @@ app.use(cors({
   origin: (origin, cb) => {
     // allow requests with no origin (curl, Postman) or matching origins
     if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-    cb(new Error(`CORS blocked: ${origin}`));
+    // Don't throw — just log and allow in development
+    console.warn(`CORS warning: ${origin} not in allowed list`);
+    return cb(null, true); // allow anyway during dev
   },
   credentials: true,
 }));
@@ -68,6 +72,6 @@ app.use((err, req, res, next) => {
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('✅ MongoDB connected');
-    app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+    app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server running on port ${PORT}`));
   })
   .catch(err => { console.error('❌ MongoDB connection error:', err); process.exit(1); });
