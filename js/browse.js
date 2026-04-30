@@ -1,4 +1,5 @@
 let allBooks     = [];
+let allBooksMap  = {}; // id → book, for fast lookup
 let currentBook  = null;
 let currentBuyBook = null;
 
@@ -12,6 +13,9 @@ async function init() {
 async function loadBooks(params = {}) {
   try {
     allBooks = await Books.getAll(params);
+    // build lookup map
+    allBooksMap = {};
+    allBooks.forEach(b => { allBooksMap[String(b._id)] = b; });
     renderBooks(allBooks);
   } catch (err) {
     showToast('Failed to load books: ' + err.message);
@@ -84,8 +88,8 @@ function filterBooks() {
 
 // ── Rent Modal ────────────────────────────────────────────────────────────────
 function openRentModal(bookId) {
-  currentBook = allBooks.find(b => String(b._id) === String(bookId));
-  if (!currentBook) { showToast('Book not found. Please refresh the page.'); return; }
+  currentBook = allBooksMap[String(bookId)];
+  if (!currentBook) { showToast('Book not found. Please refresh.'); return; }
   document.getElementById('rentBookTitle').textContent = `"${currentBook.title}" by ${currentBook.author}`;
   document.getElementById('rentRateInfo').textContent  = `Rental rate: ₹${currentBook.rentPrice} per day`;
   document.getElementById('rentDays').value = 1;
@@ -140,8 +144,8 @@ function closeModal() {
 
 // ── Buy Modal ─────────────────────────────────────────────────────────────────
 function openBuyModal(bookId) {
-  currentBuyBook = allBooks.find(b => String(b._id) === String(bookId));
-  if (!currentBuyBook) { showToast('Book not found. Please refresh the page.'); return; }
+  currentBuyBook = allBooksMap[String(bookId)];
+  if (!currentBuyBook) { showToast('Book not found. Please refresh.'); return; }
   document.getElementById('buyBookTitle').textContent = `"${currentBuyBook.title}" by ${currentBuyBook.author}`;
   document.getElementById('buyPrice').textContent     = `₹${currentBuyBook.buyPrice}`;
   document.getElementById('buyTotal').textContent     = `₹${currentBuyBook.buyPrice}`;
@@ -164,7 +168,6 @@ function closeBuyModal() {
   currentBuyBook = null;
 }
 
-// ── Quick add to cart ─────────────────────────────────────────────────────────
 async function addToCartQuick(bookId) {
   try {
     await CartAPI.add(String(bookId), 'cart');
