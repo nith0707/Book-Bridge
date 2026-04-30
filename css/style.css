@@ -511,7 +511,7 @@ select option { background: #302b63; color: var(--text); }
 .book-cover-placeholder[data-cat="RomCom"]        { background: #2e0a1a; }
 .book-cover-placeholder[data-cat="FanFiction"]    { background: #0a1a0a; }
 .book-cover-placeholder[data-cat="Education"]     { background: #0a1a2e; }
-.book-cover-placeholder[data-cat="BTech CSE"]     { background: #0a1a1a; }
+.book-cover-placeholder[data-cat="Computer Science"]     { background: #0a1a1a; }
 
 .cover-shimmer .shimmer-inner {
   position: absolute;
@@ -559,8 +559,8 @@ select option { background: #302b63; color: var(--text); }
 .book-category[data-cat="FanFiction"]    { background: rgba(34,197,94,0.15);  color: #4ade80; }
 .book-card:has([data-cat="Education"])     .book-category,
 .book-category[data-cat="Education"]     { background: rgba(59,130,246,0.15); color: #60a5fa; }
-.book-card:has([data-cat="BTech CSE"])     .book-category,
-.book-category[data-cat="BTech CSE"]     { background: rgba(20,184,166,0.15); color: #2dd4bf; }
+.book-card:has([data-cat="Computer Science"])     .book-category,
+.book-category[data-cat="Computer Science"]     { background: rgba(20,184,166,0.15); color: #2dd4bf; }
 
 .book-prices { display: flex; gap: 10px; margin-top: 4px; }
 .price-tag { font-size: 12px; color: var(--text-muted); }

@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const bookSchema = new mongoose.Schema({
   title:       { type: String, required: true, trim: true },
   author:      { type: String, required: true, trim: true },
-  category:    { type: String, required: true, enum: ['Thriller','Philosophical','RomCom','FanFiction','Education','BTech CSE'] },
+  category:    { type: String, required: true, enum: ['Thriller','Philosophical','RomCom','FanFiction','Education','Computer Science'] },
   rentPrice:   { type: Number, required: true, min: 0 },
   buyPrice:    { type: Number, required: true, min: 0 },
   image:       { type: String, default: '' },          // Cloudinary URL
