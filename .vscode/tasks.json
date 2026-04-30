@@ -1,0 +1,20 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Book Bridge Server",
+      "type": "shell",
+      "command": "npx kill-port 5000 ; npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/server"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}
