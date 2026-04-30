@@ -1,24 +1,26 @@
 let allBooks     = [];
-let allBooksMap  = {}; // id → book, for fast lookup
+let allBooksMap  = {};
 let currentBook  = null;
 let currentBuyBook = null;
 
 buildNav('browse');
 
-// ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
   await Promise.all([loadBooks(), loadAuthors()]);
 }
 
-async function loadBooks(params = {}) {
+async function loadBooks() {
   try {
-    allBooks = await Books.getAll(params);
-    // build lookup map
+    const books = await Books.getAll();
+    allBooks = books || [];
     allBooksMap = {};
-    allBooks.forEach(b => { allBooksMap[String(b._id)] = b; });
+    allBooks.forEach(b => {
+      if (b && b._id) allBooksMap[String(b._id)] = b;
+    });
     renderBooks(allBooks);
   } catch (err) {
-    showToast('Failed to load books: ' + err.message);
+    showToast('Failed to load books. Is the server running?');
+    console.error(err);
   }
 }
 
@@ -26,8 +28,9 @@ async function loadAuthors() {
   try {
     const authors = await Books.getAuthors();
     const select  = document.getElementById('authorFilter');
+    if (!select) return;
     select.innerHTML = '<option value="">All Authors</option>';
-    authors.forEach(a => {
+    (authors || []).forEach(a => {
       const opt = document.createElement('option');
       opt.value = a; opt.textContent = a;
       select.appendChild(opt);
@@ -35,20 +38,27 @@ async function loadAuthors() {
   } catch {}
 }
 
-// ── Render ────────────────────────────────────────────────────────────────────
 function renderBooks(books) {
   const grid    = document.getElementById('booksGrid');
   const noRes   = document.getElementById('noResults');
   const countEl = document.getElementById('resultsCount');
+  if (!grid) return;
 
-  countEl.textContent = books.length > 0 ? `Showing ${books.length} book${books.length !== 1 ? 's' : ''}` : '';
-  if (books.length === 0) { grid.innerHTML = ''; noRes.classList.remove('hidden'); return; }
+  countEl.textContent = books.length > 0
+    ? `Showing ${books.length} book${books.length !== 1 ? 's' : ''}` : '';
+
+  if (books.length === 0) {
+    grid.innerHTML = '';
+    noRes.classList.remove('hidden');
+    return;
+  }
   noRes.classList.add('hidden');
 
   grid.innerHTML = books.map(book => {
+    if (!book) return '';
+    const id  = String(book._id);
     const ai  = aiFallbackUrl(book.title, book.author, book.category);
     const src = book.image || ai;
-    const id  = book._id; // MongoDB _id
     return `
     <div class="book-card">
       <div class="book-img-wrap">
@@ -73,12 +83,12 @@ function renderBooks(books) {
   }).join('');
 }
 
-// ── Filter ────────────────────────────────────────────────────────────────────
 function filterBooks() {
-  const q        = document.getElementById('searchInput').value.toLowerCase();
+  const q        = (document.getElementById('searchInput').value || '').toLowerCase();
   const category = document.getElementById('categoryFilter').value;
   const author   = document.getElementById('authorFilter').value;
   const filtered = allBooks.filter(b =>
+    b &&
     b.title.toLowerCase().includes(q) &&
     (!category || b.category === category) &&
     (!author   || b.author   === author)
@@ -86,12 +96,16 @@ function filterBooks() {
   renderBooks(filtered);
 }
 
-// ── Rent Modal ────────────────────────────────────────────────────────────────
+// ── RENT MODAL ────────────────────────────────────────────────────────────────
 function openRentModal(bookId) {
-  currentBook = allBooksMap[String(bookId)];
-  if (!currentBook) { showToast('Book not found. Please refresh.'); return; }
-  document.getElementById('rentBookTitle').textContent = `"${currentBook.title}" by ${currentBook.author}`;
-  document.getElementById('rentRateInfo').textContent  = `Rental rate: ₹${currentBook.rentPrice} per day`;
+  const book = allBooksMap[String(bookId)];
+  if (!book) {
+    showToast('Could not find book. Please refresh the page.');
+    return;
+  }
+  currentBook = book;
+  document.getElementById('rentBookTitle').textContent = `"${book.title}" by ${book.author}`;
+  document.getElementById('rentRateInfo').textContent  = `Rental rate: ₹${book.rentPrice} per day`;
   document.getElementById('rentDays').value = 1;
   document.getElementById('err-rentDays').textContent  = '';
   document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
@@ -109,7 +123,7 @@ function changeDays(delta) {
 function setDays(n) {
   document.getElementById('rentDays').value = n;
   document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+  if (event && event.target) event.target.classList.add('active');
   calcRent();
 }
 
@@ -123,6 +137,7 @@ function calcRent() {
 }
 
 async function confirmRent() {
+  if (!currentBook) { showToast('No book selected.'); return; }
   const days  = parseInt(document.getElementById('rentDays').value) || 0;
   const errEl = document.getElementById('err-rentDays');
   if (days < 1)   { errEl.textContent = 'Please enter at least 1 day.'; return; }
@@ -131,9 +146,12 @@ async function confirmRent() {
   try {
     await CartAPI.add(String(currentBook._id), 'rent', days);
     updateCartBadge();
+    const msg = `✅ "${currentBook.title}" rented for ${days} day(s) — ₹${days * currentBook.rentPrice}`;
     closeModal();
-    showToast(`✅ "${currentBook.title}" rented for ${days} day(s) — ₹${days * currentBook.rentPrice}`);
-  } catch (err) { showToast('Error: ' + err.message); }
+    showToast(msg);
+  } catch (err) {
+    showToast('Error: ' + (err.message || 'Something went wrong'));
+  }
 }
 
 function closeModal() {
@@ -142,24 +160,32 @@ function closeModal() {
   currentBook = null;
 }
 
-// ── Buy Modal ─────────────────────────────────────────────────────────────────
+// ── BUY MODAL ─────────────────────────────────────────────────────────────────
 function openBuyModal(bookId) {
-  currentBuyBook = allBooksMap[String(bookId)];
-  if (!currentBuyBook) { showToast('Book not found. Please refresh.'); return; }
-  document.getElementById('buyBookTitle').textContent = `"${currentBuyBook.title}" by ${currentBuyBook.author}`;
-  document.getElementById('buyPrice').textContent     = `₹${currentBuyBook.buyPrice}`;
-  document.getElementById('buyTotal').textContent     = `₹${currentBuyBook.buyPrice}`;
+  const book = allBooksMap[String(bookId)];
+  if (!book) {
+    showToast('Could not find book. Please refresh the page.');
+    return;
+  }
+  currentBuyBook = book;
+  document.getElementById('buyBookTitle').textContent = `"${book.title}" by ${book.author}`;
+  document.getElementById('buyPrice').textContent     = `₹${book.buyPrice}`;
+  document.getElementById('buyTotal').textContent     = `₹${book.buyPrice}`;
   document.getElementById('buyModal').classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 }
 
 async function confirmBuy() {
+  if (!currentBuyBook) { showToast('No book selected.'); return; }
   try {
     await CartAPI.add(String(currentBuyBook._id), 'buy');
     updateCartBadge();
+    const msg = `✅ "${currentBuyBook.title}" added to cart!`;
     closeBuyModal();
-    showToast(`✅ "${currentBuyBook.title}" added to cart for purchase!`);
-  } catch (err) { showToast('Error: ' + err.message); }
+    showToast(msg);
+  } catch (err) {
+    showToast('Error: ' + (err.message || 'Something went wrong'));
+  }
 }
 
 function closeBuyModal() {
@@ -168,25 +194,32 @@ function closeBuyModal() {
   currentBuyBook = null;
 }
 
+// ── CART ──────────────────────────────────────────────────────────────────────
 async function addToCartQuick(bookId) {
   try {
     await CartAPI.add(String(bookId), 'cart');
     updateCartBadge();
     showToast('✅ Added to cart!');
-  } catch (err) { showToast('Error: ' + err.message); }
+  } catch (err) {
+    showToast('Error: ' + (err.message || 'Something went wrong'));
+  }
 }
 
-// ── Toast ─────────────────────────────────────────────────────────────────────
+// ── TOAST ─────────────────────────────────────────────────────────────────────
 function showToast(msg) {
   let t = document.getElementById('bb-toast');
-  if (!t) { t = document.createElement('div'); t.id = 'bb-toast'; document.body.appendChild(t); }
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'bb-toast';
+    document.body.appendChild(t);
+  }
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(t._timer);
   t._timer = setTimeout(() => t.classList.remove('show'), 3200);
 }
 
-// Modal close handlers
+// close on overlay click or Escape
 document.getElementById('rentModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
 document.getElementById('buyModal').addEventListener('click',  e => { if (e.target === e.currentTarget) closeBuyModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeBuyModal(); } });
