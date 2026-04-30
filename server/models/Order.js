@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const orderItemSchema = new mongoose.Schema({
   book:    { type: mongoose.Schema.Types.ObjectId, ref: 'Book' },
-  type:    { type: String, enum: ['rent', 'buy'] },
+  type:    { type: String, enum: ['rent', 'buy', 'cart'] },
   days:    { type: Number, default: null },
   price:   { type: Number },
 });
