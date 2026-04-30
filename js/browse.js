@@ -84,8 +84,8 @@ function filterBooks() {
 
 // ── Rent Modal ────────────────────────────────────────────────────────────────
 function openRentModal(bookId) {
-  currentBook = allBooks.find(b => b._id === bookId);
-  if (!currentBook) return;
+  currentBook = allBooks.find(b => String(b._id) === String(bookId));
+  if (!currentBook) { showToast('Book not found. Please refresh the page.'); return; }
   document.getElementById('rentBookTitle').textContent = `"${currentBook.title}" by ${currentBook.author}`;
   document.getElementById('rentRateInfo').textContent  = `Rental rate: ₹${currentBook.rentPrice} per day`;
   document.getElementById('rentDays').value = 1;
@@ -124,9 +124,8 @@ async function confirmRent() {
   if (days < 1)   { errEl.textContent = 'Please enter at least 1 day.'; return; }
   if (days > 365) { errEl.textContent = 'Maximum rental period is 365 days.'; return; }
   errEl.textContent = '';
-
   try {
-    await CartAPI.add(currentBook._id, 'rent', days);
+    await CartAPI.add(String(currentBook._id), 'rent', days);
     updateCartBadge();
     closeModal();
     showToast(`✅ "${currentBook.title}" rented for ${days} day(s) — ₹${days * currentBook.rentPrice}`);
@@ -141,8 +140,8 @@ function closeModal() {
 
 // ── Buy Modal ─────────────────────────────────────────────────────────────────
 function openBuyModal(bookId) {
-  currentBuyBook = allBooks.find(b => b._id === bookId);
-  if (!currentBuyBook) return;
+  currentBuyBook = allBooks.find(b => String(b._id) === String(bookId));
+  if (!currentBuyBook) { showToast('Book not found. Please refresh the page.'); return; }
   document.getElementById('buyBookTitle').textContent = `"${currentBuyBook.title}" by ${currentBuyBook.author}`;
   document.getElementById('buyPrice').textContent     = `₹${currentBuyBook.buyPrice}`;
   document.getElementById('buyTotal').textContent     = `₹${currentBuyBook.buyPrice}`;
@@ -152,7 +151,7 @@ function openBuyModal(bookId) {
 
 async function confirmBuy() {
   try {
-    await CartAPI.add(currentBuyBook._id, 'buy');
+    await CartAPI.add(String(currentBuyBook._id), 'buy');
     updateCartBadge();
     closeBuyModal();
     showToast(`✅ "${currentBuyBook.title}" added to cart for purchase!`);
@@ -168,7 +167,7 @@ function closeBuyModal() {
 // ── Quick add to cart ─────────────────────────────────────────────────────────
 async function addToCartQuick(bookId) {
   try {
-    await CartAPI.add(bookId, 'cart');
+    await CartAPI.add(String(bookId), 'cart');
     updateCartBadge();
     showToast('✅ Added to cart!');
   } catch (err) { showToast('Error: ' + err.message); }
